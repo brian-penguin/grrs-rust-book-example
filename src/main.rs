@@ -1,4 +1,5 @@
 use std::env;
+use std::error::Error;
 use std::fs;
 use std::process;
 
@@ -13,11 +14,13 @@ fn main() {
     println!("pattern: {}", config.query);
     println!("path: {:?}", config.filename);
 
-    let filepath = fs::canonicalize(&config.filename);
-    println!("path (cannonicalized) {:?}", filepath);
+    //let filepath = fs::canonicalize(&config.filename);
+    //println!("path (cannonicalized) {:?}", filepath);
 
-    let file_contents =
-        fs::read_to_string(config.filename).expect("Something went wrong reading the file");
+    if let Err(e) = run(config) {
+        println!("Application Error: {}", e);
+        process::exit(1)
+    }
 }
 
 struct Config {
@@ -36,4 +39,11 @@ impl Config {
 
         Ok(Config { query, filename })
     }
+}
+
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let file_contents = fs::read_to_string(config.filename)?;
+
+    println!("With text:\n{}", file_contents);
+    Ok(())
 }
