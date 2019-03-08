@@ -25,3 +25,32 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     println!("With text:\n{}", file_contents);
     Ok(())
 }
+
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    let mut matches = Vec::new();
+
+    for line in contents.lines() {
+        if line.contains(query) {
+            matches.push(line);
+        }
+    }
+
+    matches
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn one_result() {
+        let query = "toot";
+        let contents = "\
+Rust:
+Safe n Fast
+Productive for bloots
+bloot's are worth a toot";
+
+        assert_eq!(vec!["bloot's are worth a toot"], search(query, contents));
+    }
+}

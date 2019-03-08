@@ -10,12 +10,6 @@ fn main() {
         process::exit(1);
     });
 
-    println!("pattern: {}", config.query);
-    println!("path: {:?}", config.filename);
-
-    //let filepath = fs::canonicalize(&config.filename);
-    //println!("path (cannonicalized) {:?}", filepath);
-
     if let Err(e) = grrs::run(config) {
         println!("Application Error: {}", e);
         process::exit(1)
