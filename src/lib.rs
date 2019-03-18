@@ -30,6 +30,11 @@ impl Config {
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let file_contents = fs::read_to_string(config.filename)?;
 
+    if config.query.len() == 0 {
+        println!("Please try again with valid query string");
+        return Ok(());
+    }
+
     let results = if config.case_sensitive {
         search(&config.query, &file_contents)
     } else {
@@ -71,26 +76,61 @@ pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a st
 mod tests {
     use super::*;
 
-    #[test]
-    fn one_result() {
-        let query = "toot";
-        let contents = "\
+    fn contents() -> &'static str {
+        "\
 Rust:
 Safe n Fast
 Productive for bloots
-bloot's are worth a toot";
+bloot's are worth a toot"
+    }
 
+    #[test]
+    fn one_result() {
+        let query = "toot";
+        let contents = contents();
         assert_eq!(vec!["bloot's are worth a toot"], search(query, contents));
+    }
+
+    #[test]
+    fn multi_results() {
+        let query = "bloot";
+        let contents = contents();
+
+        assert_eq!(
+            vec!["Productive for bloots", "bloot's are worth a toot"],
+            search(query, contents)
+        );
+    }
+
+    #[test]
+    fn no_results() {
+        let query = "NOT FOUND";
+        let contents = contents();
+
+        let mut empty = vec![""];
+        empty.clear();
+        assert_eq!(empty, search(query, contents));
+    }
+
+    #[test]
+    fn whitespace() {
+        let query = " ";
+        let contents = contents();
+
+        assert_eq!(
+            vec![
+                "Safe n Fast",
+                "Productive for bloots",
+                "bloot's are worth a toot"
+            ],
+            search(query, contents)
+        );
     }
 
     #[test]
     fn case_insensitive() {
         let query = "blOOt";
-        let contents = "\
-Rust:
-Safe n Fast
-Productive for bloots
-bloot's are worth a toot";
+        let contents = contents();
 
         assert_eq!(
             vec!["Productive for bloots", "bloot's are worth a toot"],
